@@ -1,0 +1,4 @@
+srcip,dstip,proto,service,state,spkts,dpkts,sbytes,dbytes
+192.168.1.2,10.0.0.5,tcp,ftp,SF,10,12,2048,1024
+192.168.1.3,10.0.0.9,udp,dns,INT,5,3,512,128
+192.168.1.4,10.0.0.8,tcp,http,SF,8,9,4096,2048

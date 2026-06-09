@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section text-center py-5 mt-3">
+  <div class="container">
+    <div class="mb-4">
+      <span class="badge px-3 py-2 mb-4 d-inline-block" style="background: rgba(0,234,255,0.12); color: #00eaff; border: 1px solid rgba(0,234,255,0.25); border-radius: 50px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px;">
+        UNSUPERVISED ML &bull; DBSCAN &bull; PCA
+      </span>
+    </div>
+    <h1 class="fw-bold text-glow mb-4" style="line-height:1.15;">
+      Detect Network Threats<br>
+      <span style="color: #00eaff;">Before They Strike</span>
+    </h1>
+    <p class="lead mb-5 mx-auto" style="max-width: 580px; color: #8e9aa8; line-height: 1.75;">
+      Upload your network connection logs and instantly surface anomalous traffic using density-based clustering — no labelled data required.
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill glow-btn fw-semibold">Launch Analyzer</a>
+      <a href="{{ url_for('download_sample') }}" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-semibold">Download Sample CSV</a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Band -->
+<section class="py-4 my-4">
+  <div class="container">
+    <div class="row justify-content-center g-4">
+      <div class="col-6 col-md-3 text-center">
+        <div class="metric p-4">
+          <h3 class="fw-bold text-cyan mb-1">DBSCAN</h3>
+          <small class="text-muted">Anomaly Engine</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="metric p-4">
+          <h3 class="fw-bold text-cyan mb-1">PCA</h3>
+          <small class="text-muted">Scatter Visualization</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="metric p-4">
+          <h3 class="fw-bold text-cyan mb-1">3 Formats</h3>
+          <small class="text-muted">Log Ingestion Presets</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="metric p-4">
+          <h3 class="fw-bold text-cyan mb-1">REST API</h3>
+          <small class="text-muted">Automation Ready</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="fw-bold text-center mb-2">Built for Security Teams</h2>
+    <p class="text-center text-muted mb-5">Every feature is designed around real analyst workflows.</p>
+    <div class="row g-4">
+
+      <div class="col-md-4">
+        <div class="card card-glass p-4 h-100">
+          <div class="mb-3" style="font-size: 1.8rem;">&#128270;</div>
+          <h5 class="fw-bold mb-2">Explainable Anomalies</h5>
+          <p class="text-muted small mb-0">Every flagged connection comes with a plain-English reason based on z-score feature deviations — so analysts know exactly what triggered the alert.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass p-4 h-100">
+          <div class="mb-3" style="font-size: 1.8rem;">&#128202;</div>
+          <h5 class="fw-bold mb-2">Interactive PCA Scatter</h5>
+          <p class="text-muted small mb-0">Hover over any data point to reveal its source IP, destination, protocol, and anomaly classification. Click outliers to whitelist them instantly.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass p-4 h-100">
+          <div class="mb-3" style="font-size: 1.8rem;">&#128196;</div>
+          <h5 class="fw-bold mb-2">Multi-Format Log Ingestion</h5>
+          <p class="text-muted small mb-0">Supports default UNSW-NB15 schema, AWS VPC Flow Logs, and Zeek (Bro) connection logs out of the box — no manual column mapping needed.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass p-4 h-100">
+          <div class="mb-3" style="font-size: 1.8rem;">&#128226;</div>
+          <h5 class="fw-bold mb-2">Webhook Alerts</h5>
+          <p class="text-muted small mb-0">Configure a Slack or Teams webhook URL and get an instant notification when suspicious traffic exceeds baseline thresholds after each analysis run.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass p-4 h-100">
+          <div class="mb-3" style="font-size: 1.8rem;">&#9989;</div>
+          <h5 class="fw-bold mb-2">IP Whitelisting</h5>
+          <p class="text-muted small mb-0">Mark known safe hosts or services directly from the results table. Whitelist rules are persisted in JSON and applied automatically on every future run.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass p-4 h-100">
+          <div class="mb-3" style="font-size: 1.8rem;">&#128296;</div>
+          <h5 class="fw-bold mb-2">REST API</h5>
+          <p class="text-muted small mb-0">Automate analysis via <code>POST /api/analyze</code>. Integrate NetAnalyzr into your SIEM pipeline, cron jobs, or CI/CD security gates.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="text-center py-5 my-3">
+  <div class="container">
+    <div class="card card-glass p-5 mx-auto" style="max-width: 680px;">
+      <h3 class="fw-bold mb-3">Ready to analyze your traffic?</h3>
+      <p class="text-muted mb-4">Upload your first CSV and see anomalies highlighted in under 30 seconds.</p>
+      <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-lg px-5 rounded-pill glow-btn fw-semibold">Start Analysis</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

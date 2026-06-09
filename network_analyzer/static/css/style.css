@@ -1,0 +1,264 @@
+/* ==========================================
+   NetAnalyzr - Earthy Security Theme
+   Palette: Dark Khaki / Hunter Green / Ocean Mist / Frosted Mint
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Palette */
+  --bg-deep:       #3d3522;   /* Dark Khaki - deepest background */
+  --bg-mid:        #4a442d;   /* Dark Khaki - secondary background */
+  --surface:       #386150;   /* Hunter Green - cards / panels */
+  --surface-raised:#3d6a57;   /* Hunter Green lightened - raised elements */
+  --accent:        #58b09c;   /* Ocean Mist - primary accent / links */
+  --accent-dim:    rgba(88, 176, 156, 0.15);
+  --accent-glow:   rgba(88, 176, 156, 0.35);
+  --text-primary:  #caf7e2;   /* Frosted Mint - main text */
+  --text-secondary:#a8d9c0;   /* Frosted Mint dimmed - secondary text */
+  --text-muted:    #7ab59a;   /* Ocean Mist dimmed - muted labels */
+  --border:        rgba(202, 247, 226, 0.1);
+  --border-accent: rgba(88, 176, 156, 0.3);
+}
+
+/* ── Base ─────────────────────────────────── */
+body.dark-bg {
+  background: linear-gradient(135deg, #3d3522 0%, #2e2818 55%, #3d3522 100%);
+  color: var(--text-primary);
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Force contrast on all inline text elements */
+body.dark-bg p,
+body.dark-bg li,
+body.dark-bg span,
+body.dark-bg label,
+body.dark-bg small,
+body.dark-bg td,
+body.dark-bg th {
+  color: var(--text-primary);
+}
+
+/* Bootstrap muted override */
+.text-muted { color: var(--text-secondary) !important; }
+
+/* All headings – always full Frosted Mint */
+h1, h2, h3, h4, h5, h6 { color: var(--text-primary) !important; }
+
+/* ── Navbar ───────────────────────────────── */
+.navbar.glass-nav {
+  background: rgba(45, 40, 24, 0.96);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-accent);
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent) !important;
+  letter-spacing: -0.3px;
+  text-shadow: 0 0 18px var(--accent-glow);
+}
+
+.nav-link {
+  color: var(--text-primary) !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  font-size: 0.9rem;
+}
+.nav-link:hover { color: var(--accent) !important; }
+
+/* ── Glow / accent text ───────────────────── */
+.text-glow  { text-shadow: 0 0 22px var(--accent-glow); }
+.text-cyan  { color: var(--accent); }     /* alias kept for templates */
+
+/* ── Buttons ──────────────────────────────── */
+.btn-primary, .glow-btn {
+  background: linear-gradient(135deg, #386150, #58b09c);
+  border: none;
+  color: #caf7e2 !important;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
+}
+.btn-primary:hover, .glow-btn:hover {
+  background: linear-gradient(135deg, #3d6a57, #6bc4af);
+  box-shadow: 0 0 24px var(--accent-glow);
+  transform: translateY(-1px);
+  color: #ffffff !important;
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-outline-light {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.btn-outline-light:hover {
+  background: rgba(88, 176, 156, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #2e6e52, #58b09c) !important;
+  border: none !important;
+  color: #caf7e2 !important;
+  font-weight: 600;
+}
+.btn-success:hover {
+  background: linear-gradient(135deg, #386150, #6bc4af) !important;
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+/* ── Glass cards ──────────────────────────── */
+.card-glass, .card {
+  background: rgba(56, 97, 80, 0.75) !important;
+  border-radius: 18px;
+  border: 1px solid var(--border-accent) !important;
+  backdrop-filter: blur(12px);
+  color: var(--text-primary) !important;
+}
+.card.bg-dark { background: rgba(45, 60, 50, 0.85) !important; }
+
+/* ── Drop Zone ────────────────────────────── */
+.drop-zone {
+  border: 2px dashed var(--border-accent);
+  border-radius: 14px;
+  color: var(--text-primary);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  background: rgba(88, 176, 156, 0.04);
+}
+.drop-zone p { color: var(--text-primary) !important; }
+.drop-zone:hover, .drop-zone.hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: #caf7e2;
+  transform: scale(1.005);
+}
+
+/* ── Metric Cards ─────────────────────────── */
+.metric {
+  background: rgba(56, 97, 80, 0.6);
+  border-radius: 14px;
+  border: 1px solid var(--border-accent);
+  text-align: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.metric:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Spinner ──────────────────────────────── */
+.spinner-border { color: var(--accent) !important; }
+
+/* ── Form Controls ────────────────────────── */
+.form-select, .form-control {
+  background-color: rgba(45, 40, 24, 0.85) !important;
+  border-color: var(--border-accent) !important;
+  color: var(--text-primary) !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-select option { background: #3d3522; color: #caf7e2; }
+.form-select:focus, .form-control:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-dim) !important;
+  outline: none;
+}
+.form-label { color: var(--text-secondary) !important; font-weight: 600; }
+::placeholder { color: var(--text-muted) !important; opacity: 1; }
+
+/* ── Tables ───────────────────────────────── */
+.table-dark {
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(202, 247, 226, 0.03);
+  --bs-table-color: var(--text-primary);
+  --bs-table-border-color: var(--border-accent);
+  font-size: 0.875rem;
+  color: var(--text-primary) !important;
+}
+.table-dark td  { color: var(--text-primary) !important; }
+.table-dark th  { color: var(--text-secondary) !important; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.table-hover tbody tr:hover { background: rgba(88, 176, 156, 0.08) !important; }
+
+/* ── Badge ────────────────────────────────── */
+.badge.bg-secondary {
+  background: rgba(88, 176, 156, 0.2) !important;
+  color: var(--accent) !important;
+  font-weight: 600;
+  border: 1px solid var(--border-accent);
+}
+
+/* ── Alerts ───────────────────────────────── */
+.alert { color: var(--text-primary); }
+.alert-success {
+  background: rgba(88, 176, 156, 0.15);
+  border-color: var(--border-accent);
+  color: #caf7e2;
+}
+.alert-danger {
+  background: rgba(180, 60, 60, 0.15);
+  border-color: rgba(200, 80, 80, 0.35);
+  color: #ffc8c8;
+}
+
+/* ── Footer ───────────────────────────────── */
+.footer {
+  background: rgba(45, 40, 24, 0.98);
+  color: var(--text-secondary) !important;
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border-accent);
+}
+.footer span { color: var(--text-secondary) !important; }
+
+/* ── Content spacing ──────────────────────── */
+.content-wrapper {
+  padding-top: 44px;
+  padding-bottom: 70px;
+}
+
+/* ── Rounded helpers ──────────────────────── */
+.rounded-pill { border-radius: 50px !important; }
+.rounded-4    { border-radius: 14px !important; }
+
+/* ── Hero ─────────────────────────────────── */
+.hero-section h1 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  color: var(--text-primary) !important;
+}
+.hero-section p { color: var(--text-secondary) !important; }
+
+/* Card inner text */
+.card-glass p, .card-glass small, .card-glass .text-muted,
+.card p, .card small {
+  color: var(--text-secondary) !important;
+}
+
+/* ── Utility ──────────────────────────────── */
+.tracking-wider { letter-spacing: 0.08em; }
+.uppercase      { text-transform: uppercase; }
+.btn-xs         { padding: 0.22rem 0.75rem; font-size: 0.78rem; color: var(--text-primary) !important; }
+
+/* Outline warning button (whitelist) */
+.btn-outline-warning {
+  border-color: #8fa86a !important;
+  color: #c9e89a !important;
+}
+.btn-outline-warning:hover {
+  background: rgba(143, 168, 106, 0.15) !important;
+  color: #d8f0ab !important;
+}
+
+/* ── Custom Scrollbar ─────────────────────── */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(88, 176, 156, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }

@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5">
+  <div class="card card-glass shadow-lg p-5 text-light border-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="display-6 fw-bold text-glow mb-1">Analyze Network Logs</h2>
+        <p class="small text-muted">Identify density-based anomalies using DBSCAN & PCA clustering</p>
+      </div>
+      <div>
+        <a class="btn btn-outline-light btn-sm px-3 rounded-pill" href="{{ url_for('download_sample') }}">Download Sample CSV</a>
+      </div>
+    </div>
+
+    <div id="alertBox" class="alert d-none mb-3" role="alert"></div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <label for="formatSelect" class="form-label small text-muted fw-semibold uppercase">Log Format Ingestion</label>
+        <select id="formatSelect" class="form-select bg-dark text-light border-secondary py-2">
+          <option value="default" selected>Default Schema (srcip, dstip, proto, service, state, spkts, dpkts, sbytes, dbytes)</option>
+          <option value="aws">AWS VPC Flow Log Schema</option>
+          <option value="zeek">Zeek (Bro) Connection Log Schema</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="webhookUrlInput" class="form-label small text-muted fw-semibold uppercase">Webhook Notification URL (Optional)</label>
+        <input id="webhookUrlInput" type="url" placeholder="https://hooks.slack.com/services/..." class="form-control bg-dark text-light border-secondary py-2">
+      </div>
+    </div>
+
+    <div id="uploadArea" class="upload-area mb-4">
+      <div id="dropZone" class="drop-zone p-5 text-center border-dashed rounded-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-cloud-arrow-up text-cyan mb-3" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708z"/>
+          <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.548l-.526.082C2.107 6.9 1 8.005 1 9.318 1 10.743 2.215 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/>
+        </svg>
+        <p class="mb-2 h5">Drag & drop a CSV traffic log here</p>
+        <p class="small text-muted">or click to select a file from your computer</p>
+        <input id="fileInput" type="file" name="file" accept=".csv" class="d-none">
+      </div>
+    </div>
+
+    <div class="text-center mb-4">
+      <button id="analyzeBtn" class="btn btn-primary px-5 py-2.5 rounded-pill glow-btn">Start Analysis</button>
+    </div>
+
+    <div id="loading" class="text-center d-none mb-4 py-4">
+      <div class="spinner-border text-cyan mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+      <div class="small text-muted">Preprocessing dataset, running DBSCAN, and rendering multi-dimensional projection...</div>
+    </div>
+
+    <!-- Results Panel -->
+    <div id="results" class="d-none mt-5">
+      <h3 class="fw-bold mb-4 text-glow">Analysis Output</h3>
+      <div class="row g-4 mb-5">
+        <div class="col-md-4">
+          <div class="metric p-4 border-0 rounded-4">
+            <h2 id="metricTotal" class="display-5 fw-bold text-light">0</h2>
+            <small class="text-muted fw-semibold uppercase tracking-wider">Total Connections</small>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="metric p-4 border-0 rounded-4">
+            <h2 id="metricAnomalies" class="display-5 fw-bold text-danger">0</h2>
+            <small class="text-muted fw-semibold uppercase tracking-wider">Anomalies Detected</small>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="metric p-4 border-0 rounded-4">
+            <h2 id="metricPercent" class="display-5 fw-bold text-warning">0%</h2>
+            <small class="text-muted fw-semibold uppercase tracking-wider">Suspicious Traffic Ratio</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mb-5">
+        <div class="col-lg-7">
+          <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm h-100">
+            <h5 class="fw-bold mb-3">Multi-Dimensional PCA Scatter Plot</h5>
+            <p class="small text-muted mb-4">Hover over points to see IP logs. Outliers are marked in red.</p>
+            <div style="position: relative; height: 350px;">
+              <canvas id="pcaScatterChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm h-100">
+            <h5 class="fw-bold mb-3">DBSCAN Baseline Clusters</h5>
+            <p class="small text-muted mb-4">Distribution of standard traffic categories identified by density clustering.</p>
+            <div style="position: relative; height: 350px;">
+              <canvas id="clusterBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anomalies Table -->
+      <div class="card bg-dark border-secondary p-4 rounded-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+          <h5 class="fw-bold mb-2 mb-md-0">Identified Threat Activities</h5>
+          <div class="w-50">
+            <input id="tableSearch" type="text" placeholder="Search by IP, protocol, or reasoning..." class="form-control bg-dark text-light border-secondary">
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table id="anomaliesTable" class="table table-dark table-striped table-hover align-middle mb-0">
+            <thead>
+              <tr class="text-muted">
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Proto</th>
+                <th>Service</th>
+                <th>State</th>
+                <th>Bytes (S/R)</th>
+                <th>Explainable Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Injected Dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <a id="downloadCsvBtn" href="#" class="btn btn-success px-4 py-2 rounded-pill">Download Full Results (CSV)</a>
+        <a id="openPlotBtn" href="#" class="btn btn-outline-light px-4 py-2 rounded-pill ms-3" target="_blank">Open Plot Image</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const drop = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const loading = document.getElementById('loading');
+  const resultsDiv = document.getElementById('results');
+  const alertBox = document.getElementById('alertBox');
+  const formatSelect = document.getElementById('formatSelect');
+  const webhookUrlInput = document.getElementById('webhookUrlInput');
+  const anomaliesTableBody = document.querySelector('#anomaliesTable tbody');
+  const tableSearch = document.getElementById('tableSearch');
+
+  let selectedFile = null;
+  let pcaChart = null;
+  let barChart = null;
+  let activeAnomalies = [];
+
+  // Drag and drop setup
+  drop.addEventListener('click', () => fileInput.click());
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('hover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('hover'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault();
+    drop.classList.remove('hover');
+    selectedFile = e.dataTransfer.files[0];
+    drop.querySelector('p').textContent = `Selected: ${selectedFile.name}`;
+  });
+
+  fileInput.addEventListener('change', () => {
+    selectedFile = fileInput.files[0];
+    drop.querySelector('p').textContent = `Selected: ${selectedFile.name}`;
+  });
+
+  // Display alert
+  function showAlert(msg, type="danger") {
+    alertBox.textContent = msg;
+    alertBox.className = `alert alert-${type}`;
+  }
+
+  // Whitelist IP function
+  window.whitelistItem = async function(type, value, buttonElement) {
+    buttonElement.disabled = true;
+    try {
+      const resp = await fetch('/api/whitelist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, value })
+      });
+      const data = await resp.json();
+      if (data.success) {
+        showAlert(`Successfully whitelisted ${type}: ${value}. Please re-run analysis to update baseline.`, 'success');
+        buttonElement.classList.remove('btn-outline-warning');
+        buttonElement.classList.add('btn-success');
+        buttonElement.textContent = 'Whitelisted';
+      } else {
+        throw new Error(data.error || 'Failed to whitelist');
+      }
+    } catch (err) {
+      alert("Error: " + err.message);
+      buttonElement.disabled = false;
+    }
+  }
+
+  // Perform upload & analysis
+  analyzeBtn.addEventListener('click', async () => {
+    if (!selectedFile) {
+      showAlert("Please drag-and-drop or select a network log CSV file first.");
+      return;
+    }
+
+    const form = new FormData();
+    form.append('file', selectedFile);
+    form.append('format', formatSelect.value);
+    form.append('webhook_url', webhookUrlInput.value);
+
+    alertBox.className = "alert d-none";
+    loading.classList.remove('d-none');
+    resultsDiv.classList.add('d-none');
+    analyzeBtn.disabled = true;
+
+    try {
+      const resp = await fetch('/analyze', { method: 'POST', body: form });
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || `Server returned ${resp.status}`);
+      }
+      const data = await resp.json();
+
+      if (data.success) {
+        // Display summary metrics
+        document.getElementById('metricTotal').textContent = data.summary.total.toLocaleString();
+        document.getElementById('metricAnomalies').textContent = data.summary.anomalies.toLocaleString();
+        document.getElementById('metricPercent').textContent = `${data.summary.percent}%`;
+        
+        document.getElementById('downloadCsvBtn').href = data.summary.csv_url;
+        if (data.summary.plot_url) {
+          document.getElementById('openPlotBtn').href = data.summary.plot_url;
+          document.getElementById('openPlotBtn').classList.remove('d-none');
+        } else {
+          document.getElementById('openPlotBtn').classList.add('d-none');
+        }
+
+        activeAnomalies = data.anomalies_list;
+        renderTable(activeAnomalies);
+
+        // Render charts
+        renderScatterChart(data.scatter_points);
+        renderBarChart(data.cluster_sizes);
+
+        loading.classList.add('d-none');
+        resultsDiv.classList.remove('d-none');
+      } else {
+        throw new Error(data.error || "Analysis failed");
+      }
+    } catch (err) {
+      showAlert("Error processing file: " + err.message);
+      loading.classList.add('d-none');
+    } finally {
+      analyzeBtn.disabled = false;
+    }
+  });
+
+  // Render the anomalies details table
+  function renderTable(anomalies) {
+    anomaliesTableBody.innerHTML = '';
+    if (anomalies.length === 0) {
+      anomaliesTableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No anomalies detected. Your network traffic matches standard baselines!</td></tr>';
+      return;
+    }
+    anomalies.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="fw-semibold text-cyan">${row.srcip}</td>
+        <td>${row.dstip}</td>
+        <td><span class="badge bg-secondary">${row.proto}</span></td>
+        <td><span class="small">${row.service}</span></td>
+        <td><span class="small">${row.state}</span></td>
+        <td class="small">${row.sbytes.toLocaleString()} / ${row.dbytes.toLocaleString()}</td>
+        <td class="text-warning small">${row.anomaly_reason}</td>
+        <td>
+          <button class="btn btn-outline-warning btn-xs rounded-pill" onclick="whitelistItem('srcip', '${row.srcip}', this)">Whitelist IP</button>
+        </td>
+      `;
+      anomaliesTableBody.appendChild(tr);
+    });
+  }
+
+  // Filter table rows based on search
+  tableSearch.addEventListener('input', () => {
+    const query = tableSearch.value.toLowerCase().trim();
+    const filtered = activeAnomalies.filter(row => {
+      return row.srcip.toLowerCase().includes(query) ||
+             row.dstip.toLowerCase().includes(query) ||
+             row.proto.toLowerCase().includes(query) ||
+             row.anomaly_reason.toLowerCase().includes(query);
+    });
+    renderTable(filtered);
+  });
+
+  // Render PCA Scatter Chart using Chart.js
+  function renderScatterChart(points) {
+    if (pcaChart) pcaChart.destroy();
+    
+    const ctx = document.getElementById('pcaScatterChart').getContext('2d');
+    
+    // Split points into normal and anomalous datasets
+    const normalData = points.filter(p => p.is_anomaly === 0).map(p => ({ x: p.pca1, y: p.pca2, details: p }));
+    const anomalyData = points.filter(p => p.is_anomaly === 1).map(p => ({ x: p.pca1, y: p.pca2, details: p }));
+
+    pcaChart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Normal Baseline',
+            data: normalData,
+            backgroundColor: 'rgba(74, 144, 226, 0.45)', // Semi-transparent blue
+            borderColor: 'rgba(74, 144, 226, 0.65)',
+            borderWidth: 1,
+            pointRadius: 4.5,
+            hoverRadius: 7
+          },
+          {
+            label: 'Anomalous Threat',
+            data: anomalyData,
+            backgroundColor: 'rgba(255, 75, 75, 0.95)', // Bright red
+            borderColor: 'rgba(255, 75, 75, 1)',
+            borderWidth: 1.5,
+            pointRadius: 6,
+            hoverRadius: 8
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: { display: true, text: 'PCA Component 1', color: '#8e9aa8' },
+            grid: { color: 'rgba(255, 255, 255, 0.08)' },
+            ticks: { color: '#8e9aa8' }
+          },
+          y: {
+            title: { display: true, text: 'PCA Component 2', color: '#8e9aa8' },
+            grid: { color: 'rgba(255, 255, 255, 0.08)' },
+            ticks: { color: '#8e9aa8' }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: '#f1f1f1' }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const item = context.raw.details;
+                return `IP: ${item.srcip} ➔ ${item.dstip} (${item.proto})`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Render DBSCAN cluster distribution sizes
+  function renderBarChart(sizes) {
+    if (barChart) barChart.destroy();
+
+    const ctx = document.getElementById('clusterBarChart').getContext('2d');
+    const labels = Object.keys(sizes);
+    const data = Object.values(sizes);
+
+    barChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Connections Size',
+          data: data,
+          backgroundColor: 'rgba(0, 234, 255, 0.65)',
+          borderColor: '#00eaff',
+          borderWidth: 1.5,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#8e9aa8' }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.08)' },
+            ticks: { color: '#8e9aa8' }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}
